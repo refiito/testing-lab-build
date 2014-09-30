@@ -13,17 +13,14 @@ backend/node_modules: backend
 frontend/node_modules: frontend
 	cd frontend && npm install
 
-BACKEND_FILES = $(shell find backend/server backend/lib -type f -name '*')
-BACKEND_FILES_OUT = $(patsubst %,dist/%, $(BACKEND_FILES))
+BACKEND_FILES_OUT = $(patsubst %,dist/%, $(shell find backend/server backend/lib backend/config -type f -name '*'))
+FRONTEND_FILES_OUT = $(patsubst frontend/dist/%,dist/frontend/%, $(shell find frontend/dist -type f -name '*'))
 
-FRONTEND_FILES = $(shell find frontend/dist -type f -name '*')
-FRONTEND_FILES_OUT = $(patsubst frontend/dist/%,dist/frontend/%, $(FRONTEND_FILES))
-
-dist: $(FRONTEND_FILES_OUT) $(BACKEND_FILES_OUT) dist/backend/node_modules
+dist: $(BACKEND_FILES_OUT) $(FRONTEND_FILES_OUT) dist/backend/node_modules
 	# do deploy here
 	@echo > /dev/null
 
-dist/backend/%: $(BACKEND_FILES) 
+dist/backend/%: backend/% 
 	@mkdir -p $(@D)
 	@cp $< $@
 
@@ -32,7 +29,7 @@ dist/backend/node_modules:
 	@mkdir -p dist/backend
 	@rsync -ra --exclude=.git backend/node_modules dist/backend/node_modules
 
-dist/frontend/%: $(FRONTEND_FILES) build_frontend
+dist/frontend/%: frontend/dist/% build_frontend
 	@mkdir -p $(@D)
 	@cp $< $@
 
